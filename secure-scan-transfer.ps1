@@ -74,3 +74,84 @@ Write-Host "Listening for new files in all source folders. This Power Shell term
 # Keep the script running indefinitely, waiting for events (does not consume system resources).
 # This command prevents the script from exiting so it keeps listening for file creation events.
 Wait-Event
+
+---
+
+# Set the account username
+$user = "user"
+
+# Select cloud service to reach source folder (uncomment one service at a time)
+$service = "My Drive" # Use for Google Drive for Desktop.
+#$service = "DropBox" # Uncomment for Dropbox.
+
+# Define folder pairs to watch for new files in source folders and to move them (deletes from source) to their corresponding destination folders. 
+# File moves trigger a deletion from the cloud service, removing the files from public sources where the file originated (scanners, public cloud accounts, etc.)
+$folderPairs = @(
+    @{ Source = "C:\Users\$user\$service\<source folder>"; Destination = "C:\Users\$user\<destination folder>" },
+    # Paste line above to add additional folder pair lines (comma after last line is optional)
+)
+
+# Handle spaces in file path's in PowerShell scripts
+function Format-Path {
+    param([string]$path)
+    return $path -replace ' ', '` ' # Escapes spaces which are necessary for PowerShell to read paths correctly.
+}
+
+# Configure and create a FileSystemWatcher for a given source path
+function Create-FileSystemWatcher {
+    param(
+        [string]$sourcePath       # The source folder path to monitor.
+    )
+    $watcher = New-Object System.IO.FileSystemWatcher
+    $watcher.Path = Format-Path -path $sourcePath   # Configure the path with space handling.
+    $watcher.Filter = "*.*"                         # Monitor all file types.
+    $watcher.IncludeSubdirectories = $false         # Do not include subdirectories.
+    $watcher.EnableRaisingEvents = $true            # Start listening for changes.
+    return $watcher
+}
+
+# Register the event that triggers when a new file is created
+function Register-FileSystemEvent {
+    param(
+        [System.IO.FileSystemWatcher]$watcher,
+        [string]$destinationPath   # The destination folder path where files will be moved.
+    )
+    # Define an action to take when a new file is detected.
+    $action = {
+        param($source, $dest, $e)
+        $sourceFilePath = $e.FullPath
+        $destinationFilePath = Join-Path -Path $dest -ChildPath $e.Name
+
+        # Invoke the file move function
+        Move-FileToDestination -sourceFilePath $sourceFilePath -destinationFilePath $destinationFilePath
+    }
+    Register-ObjectEvent -InputObject $watcher -EventName Created -Action $action -MessageData @{
+        source = $watcher.Path
+        dest = $destinationPath
+    }
+}
+
+# Move files from source to destination
+function Move-FileToDestination {
+    param(
+        [string]$sourceFilePath,       # Full path of the source file
+        [string]$destinationFilePath   # Full path of the destination
+    )
+    try {
+        Move-Item -Path $sourceFilePath -Destination $destinationFilePath -ErrorAction Stop
+        Write-Host "Moved file: $(Split-Path -Leaf $sourceFilePath) from $sourceFilePath to $destinationFilePath"
+    } catch {
+        Write-Host "Error moving file $(Split-Path -Leaf $sourceFilePath): $_"
+    }
+}
+
+# Configure watchers and register event handlers for each folder pair
+foreach ($pair in $folderPairs) {
+    $watcher = Create-FileSystemWatcher -sourcePath $pair.Source
+    Register-FileSystemEvent -watcher $watcher -destinationPath $pair.Destination
+}
+
+Write-Host "Listening for new files in all source folders. This PowerShell terminal can be minimized. To stop, press Ctrl+C."
+
+# Keep the script running indefinitely, waiting for events.
+Wait-Event
