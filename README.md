@@ -13,7 +13,7 @@ Cloud scanner integrations provide encryption by default, which avoids reliance 
 To launch the script, open PowerShell and execute the following command:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File "path_to_your_script.ps1"
+powershell -ExecutionPolicy Bypass -File "<path_to_your_script>\secure-scan-transfer.ps1"
 ```
 
 Using `-ExecutionPolicy Bypass` allows the script to run without permanently changing the global execution policy. This method bypasses the policy only for the current session, ensuring that the script executes while maintaining stricter security policies by default.
