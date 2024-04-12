@@ -4,9 +4,9 @@ Easy and secure scanning from public scanners to remote file systems.
 
 ## Intro
 
-**secure-scan-transfer** is a PowerShell script that secures scanning from cloud enabled shared scanners to workstations or servers. Desktop clients can be used to sync scans to a computer but copies of the scans can remain accessible on shared scanners and in cloud storage. This script actively monitors cloud-synced folders, moving incoming files to local folders, automatically deleting scans from cloud storage and therefore from the shared scanner interfaces in public areas like shared office spaces.
+**secure-scan-transfer** is a PowerShell script that secures scanning from public office space scanners, directly to internet connected workstations or servers. While cloud sync desktop clients provide an easy way to sync scans to a computer, copies can remain accessible on shared scanners and in cloud storage. This script actively monitors cloud-synced folders, moving any incoming files to local folders, automatically deleting scans from cloud storage and therefore from the publicly accessible interfaces of shared scanners.
 
-The ability to use cloud integrations that are encrypted by default eliminates the need to rely on outdated, less secure protocols such as SMB or FTP, which often require additional security layers like VPNs that can still expose files on local networks. **secure-scan-transfer** allows admins to easily setup advanced and secure direct scanning to remote computers.
+The ability to use cloud integrations that are encrypted by default eliminates the need to rely on outdated, less secure scanner protocols such as SMB or FTP, which often require additional security layers like site 2 site VPNs that can still expose files on local networks. **secure-scan-transfer** allows admins to utilize easy to setup advanced and secure direct scanning to remote computers.
 
 ## Running the Script
 
